@@ -109,3 +109,12 @@ class DelegationSchemaTests(unittest.TestCase):
   p=os.path.join(tempfile.mkdtemp(),'c.json')
   with open(p,'w') as f: json.dump({'subagent_policy':'balanced'},f)
   self.assertEqual(load_config(p)[1].subagent_policy,'balanced')
+
+
+class ConversationTests(unittest.TestCase):
+ def test_history_is_reused(self):
+  from zj_agentx2.core import AgentRuntime,AgentConfig,ScriptedModel
+  m=ScriptedModel(['{"type":"final","content":"first"}','{"type":"final","content":"second"}'])
+  h=[{"role":"system","content":"system"}]; r=AgentRuntime(build_default_registry(tempfile.mkdtemp()),m)
+  self.assertEqual(r.run('one',AgentConfig(),history=h),'first'); self.assertEqual(r.run('two',AgentConfig(),history=h),'second')
+  self.assertEqual([x['content'] for x in h if x['role']=='user'],['one','two'])

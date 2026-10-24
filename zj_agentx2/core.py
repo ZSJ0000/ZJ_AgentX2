@@ -72,9 +72,10 @@ class AgentRuntime:
             return 'long task stop requested: '+str(args.get('reason','model requested stop'))
         return 'stop remains false; continue'
 
-    def run(self, task, config, depth=0, long_mode=False, stop_event=None):
+    def run(self, task, config, depth=0, long_mode=False, stop_event=None, history=None):
         if depth > config.max_depth: return "subagent depth limit reached"
-        messages=[{"role":"system","content":config.system_prompt + "\n\n" + self.platform_context},{"role":"user","content":task}]
+        messages=history if history is not None else [{"role":"system","content":config.system_prompt + "\n\n" + self.platform_context}]
+        messages.append({"role":"user","content":task})
         event=stop_event
         for _ in range(config.max_rounds):
             if event is not None and event.is_set(): return "stopped by user"
@@ -85,6 +86,7 @@ class AgentRuntime:
             else: raw=response.content
             data=self._parse(raw); self.audit.append({"agent":config.name,"response":data})
             if data.get("type") == "final":
+                if history is not None: history.append({"role":"assistant","content":data.get("content","")})
                 if long_mode and not (event is not None and event.is_set()) and not self._stop_requested:
                     messages.append({"role":"assistant","content":data.get("content","")}); messages.append({"role":"user","content":"继续执行。只有调用 long_task_stop 且 stop=true，或用户停止，才能结束。"}); continue
                 return data.get("content", "")
@@ -97,6 +99,7 @@ class AgentRuntime:
                 try: result=self.registry.execute(name, args)
                 except Exception as e: result="tool error: "+str(e)
             messages.append({"role":"assistant","content":raw}); messages.append({"role":"tool","tool_call_id":data.get("id",""),"name":name,"content":str(result)})
+            if history is not None and messages is not history: history[:] = messages
         return "max rounds reached"
     def _schemas(self, config):
         schemas = self.registry.schemas(config.allowed_tools)
