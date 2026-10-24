@@ -18,3 +18,12 @@ registry.register(ToolDefinition("my_tool", "说明", {"type":"object","properti
 ## 自定义模型
 
 实现 `complete(messages, tools)`，返回 `ModelResponse`，即可注入 `AgentRuntime(model=...)`。测试中的 `ScriptedModel` 就是示例。
+
+
+## MCP
+
+CLI 从 `mcp_servers` 启动 stdio MCP Server，工具注册为 `demo__工具名`，并受 `allowed_tools` 控制。
+
+## 子 Agent 配置
+
+在 `subagents` 中配置 `system_prompt`、`allowed_tools`、`max_rounds` 和 `max_depth`。

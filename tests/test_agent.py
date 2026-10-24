@@ -41,3 +41,8 @@ class AddedFeatureTests(unittest.TestCase):
    def list_tools(self): return [{'name':'echo','inputSchema':{'type':'object','properties':{'text':{'type':'string'}},'required':['text']}}]
    def call_tool(self,n,a): return {'content':[{'type':'text','text':a['text']}]}
   r=ToolRegistry(); self.assertEqual(MCPToolBridge(F(),'demo').register_tools(r),['demo__echo']); self.assertEqual(r.execute('demo__echo',{'text':'ok'}),'ok')
+
+class ConfigRuntimeTests(unittest.TestCase):
+ def test_mcp_timeout_property_exists(self):
+  from zj_agentx2.mcp import MCPStdioClient
+  self.assertEqual(MCPStdioClient('no-such-command', timeout=3).timeout,3)

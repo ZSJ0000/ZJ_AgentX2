@@ -6,5 +6,24 @@
   "timeout_seconds": 60,
   "max_rounds": 8,
   "max_depth": 2,
-  "enable_shell": false
+  "enable_shell": false,
+  "mcp_servers": [
+    {
+      "name": "demo",
+      "command": "python",
+      "args": [
+        "path/to/mcp_server.py"
+      ],
+      "timeout_seconds": 30
+    }
+  ],
+  "subagents": {
+    "researcher": {
+      "system_prompt": "Research carefully.",
+      "allowed_tools": [
+        "http_get"
+      ],
+      "max_rounds": 6
+    }
+  }
 }

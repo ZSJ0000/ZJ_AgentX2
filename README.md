@@ -30,3 +30,8 @@ python -m unittest discover -s tests -v
 命令执行工具不默认注册；文件工具限制在 `workspace` 目录；HTTP 仅支持 http/https；所有工具参数会先校验。生产环境建议使用低权限账户、容器或沙箱运行。
 
 详见 `docs/DESIGN.md`、`docs/USAGE.md`。
+
+
+### 配置 MCP 和子 Agent
+
+在 `config.json` 中添加 `mcp_servers`，启动时自动 initialize、tools/list，并注册为 `<name>__<tool>`；`subagents` 可直接配置子 Agent。

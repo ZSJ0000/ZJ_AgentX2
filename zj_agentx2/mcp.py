@@ -1,4 +1,4 @@
-import json, subprocess, threading
+import json, subprocess, threading, time
 class MCPError(Exception): pass
 class MCPStdioClient:
  def __init__(self,command,args=None,env=None,cwd=None,timeout=30): self.command,self.args,self.env,self.cwd,self.timeout=command,args or [],env,cwd,timeout; self.proc=None; self.n=1; self.lock=threading.Lock()
@@ -15,7 +15,9 @@ class MCPStdioClient:
  def _request(self,m,p):
   with self.lock:
    i=self.n; self.n+=1; self._send({'jsonrpc':'2.0','id':i,'method':m,'params':p})
+   deadline=time.time()+self.timeout
    while 1:
+    if time.time()>deadline: raise MCPError('MCP request timeout')
     x=self._receive()
     if x.get('id')!=i: continue
     if 'error' in x: raise MCPError(str(x['error']))
