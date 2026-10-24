@@ -19,3 +19,25 @@ class AgentTests(unittest.TestCase):
   r=build_default_registry(tempfile.mkdtemp())
   with self.assertRaises(ValueError): r.execute('calculator',{'expression':'1','bad':2})
 if __name__=='__main__': unittest.main()
+
+class AddedFeatureTests(unittest.TestCase):
+ def test_native_tool_call(self):
+  class M:
+   def __init__(self): self.n=0
+   def complete(self,m,t):
+    from zj_agentx2.core import ModelResponse
+    self.n+=1
+    return ModelResponse(tool_calls=[{'id':'1','name':'calculator','arguments':{'expression':'2+3'}}]) if self.n==1 else ModelResponse('{"type":"final","content":"5"}')
+  self.assertEqual(AgentRuntime(build_default_registry(tempfile.mkdtemp()),M()).run('x',AgentConfig()),'5')
+ def test_config_subagent(self):
+  import json
+  from zj_agentx2.config import load_config
+  p=os.path.join(tempfile.mkdtemp(),'c.json')
+  with open(p,'w') as f: f.write(json.dumps({'subagents':{'math':{'allowed_tools':['calculator']}}}))
+  self.assertEqual(load_config(p)[1].subagents['math'].allowed_tools,['calculator'])
+ def test_mcp_bridge(self):
+  from zj_agentx2.mcp import MCPToolBridge
+  class F:
+   def list_tools(self): return [{'name':'echo','inputSchema':{'type':'object','properties':{'text':{'type':'string'}},'required':['text']}}]
+   def call_tool(self,n,a): return {'content':[{'type':'text','text':a['text']}]}
+  r=ToolRegistry(); self.assertEqual(MCPToolBridge(F(),'demo').register_tools(r),['demo__echo']); self.assertEqual(r.execute('demo__echo',{'text':'ok'}),'ok')
