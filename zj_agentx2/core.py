@@ -1,4 +1,5 @@
 import json, time, urllib.request
+from .platform import model_context
 
 class ModelResponse:
     def __init__(self, content=None, tool_calls=None): self.content=content or ""; self.tool_calls=tool_calls or []
@@ -23,7 +24,7 @@ class OpenAIModel:
         return ModelResponse(message.get("content") or "", calls)
 
 class AgentRuntime:
-    def __init__(self, registry, model, audit=None): self.registry=registry; self.model=model; self.audit=audit or []; self._stop_requested=False
+    def __init__(self, registry, model, audit=None, platform_context=None): self.registry=registry; self.model=model; self.audit=audit or []; self.platform_context=platform_context or model_context(); self._stop_requested=False
     def request_stop(self): self._stop_requested=True
     def run_long_task(self, task, config, stop_event=None, max_cycles=1000, depth=0):
         import threading
@@ -44,7 +45,7 @@ class AgentRuntime:
 
     def run(self, task, config, depth=0, long_mode=False, stop_event=None):
         if depth > config.max_depth: return "subagent depth limit reached"
-        messages=[{"role":"system","content":config.system_prompt},{"role":"user","content":task}]
+        messages=[{"role":"system","content":config.system_prompt + "\n\n" + self.platform_context},{"role":"user","content":task}]
         event=stop_event
         for _ in range(config.max_rounds):
             if event is not None and event.is_set(): return "stopped by user"
@@ -89,4 +90,5 @@ class AgentRuntime:
 class ScriptedModel:
     def __init__(self, responses): self.responses=list(responses); self.calls=0
     def complete(self, messages, tools):
+        self.last_messages=messages
         x=self.responses[min(self.calls, len(self.responses)-1)]; self.calls+=1; return ModelResponse(x)

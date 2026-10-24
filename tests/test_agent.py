@@ -79,3 +79,14 @@ class LongTaskFinalTests(unittest.TestCase):
   from zj_agentx2.web import AgentWebServer,WebConfig
   def r(t,e,n): e.set(); return {'result':'ok','cycles':1,'stop_reason':'user_or_tool_stop'}
   s=AgentWebServer(WebConfig(auth_enabled=False),long_runner=r); s.start_task('x',True); s.task_thread.join(1); self.assertEqual(s.task['state'],'completed'); self.assertEqual(s.task['result'],'ok')
+
+class PlatformMechanismTests(unittest.TestCase):
+ def test_manifest_and_context(self):
+  from zj_agentx2.platform import load_manifest, model_context
+  m=load_manifest(); self.assertEqual(m['name'],'ZJ AgentX2'); self.assertIn('host_callbacks_required',model_context(m))
+ def test_platform_tool(self):
+  import json
+  r=build_default_registry(tempfile.mkdtemp()); self.assertEqual(json.loads(r.execute('platform_info',{}))['edition'],'personal')
+ def test_agent_context(self):
+  from zj_agentx2.core import AgentRuntime,AgentConfig,ScriptedModel
+  m=ScriptedModel(['{"type":"final","content":"ok"}']); AgentRuntime(build_default_registry(tempfile.mkdtemp()),m).run('x',AgentConfig()); self.assertIn('Platform capability manifest',m.last_messages[0]['content'])

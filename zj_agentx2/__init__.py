@@ -3,3 +3,5 @@ from .tools import ToolDefinition, ToolRegistry, build_default_registry
 __all__ = ["AgentRuntime", "AgentConfig", "ModelResponse", "ScriptedModel", "ToolDefinition", "ToolRegistry", "build_default_registry", "HostBridge", "HostToolBridge"]
 
 from .host import HostBridge, HostToolBridge
+
+from .platform import load_manifest, model_context

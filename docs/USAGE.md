@@ -52,3 +52,11 @@ HostToolBridge(host).register_tools(registry)
 ## 长任务
 
 长任务在后台线程运行，页面可以查看状态并点击停止。即使开启长任务，也保留最大周期安全上限。
+
+## 平台机制文件
+
+- `PLATFORM.md`：人类可读机制说明。
+- `platform_manifest.json`：机器可读能力清单。
+- `platform_info`：Agent 查询平台能力的工具。
+
+平台清单不会授予额外权限；实际权限仍由 Agent allowlist、MCP 配置和 HostBridge 回调决定。

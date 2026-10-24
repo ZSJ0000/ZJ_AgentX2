@@ -1,4 +1,5 @@
 import ast, json, os, urllib.request, datetime, uuid, glob, platform
+from .platform import load_manifest
 
 class ToolDefinition:
     def __init__(self, name, description, schema, handler, category="utility", risk="low"):
@@ -61,6 +62,7 @@ def build_default_registry(workspace, enable_shell=False):
         base=os.path.abspath(workspace); root=_safe_path(workspace,a.get("path","")); return json.dumps([os.path.relpath(x,workspace) for x in glob.glob(os.path.join(root,a["pattern"]),recursive=True) if os.path.commonprefix([os.path.abspath(x),base+os.sep])==base+os.sep])
     r.register(ToolDefinition("find_files", "按 glob 搜索 workspace 文件", {"type":"object","properties":{"pattern":{"type":"string"},"path":{"type":"string"}},"required":["pattern"],"additionalProperties":False}, find, "filesystem", "medium"))
     r.register(ToolDefinition("system_info", "返回脱敏系统信息", {"type":"object","properties":{},"additionalProperties":False}, lambda a: json.dumps({"platform":platform.system(),"python":platform.python_version()})))
+    r.register(ToolDefinition("platform_info", "查询平台能力和安全规则", {"type":"object","properties":{},"additionalProperties":False}, lambda a: json.dumps(load_manifest(), ensure_ascii=False)))
     return r
 
 def _safe_path(root, path):
