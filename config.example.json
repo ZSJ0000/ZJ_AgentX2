@@ -38,5 +38,14 @@
       "max_rounds": 6
     }
   },
-  "enable_host_tools": false
+  "enable_host_tools": false,
+  "web": {
+    "enabled": true,
+    "host": "127.0.0.1",
+    "port": 8765,
+    "auth_enabled": true,
+    "auth_mode": "text",
+    "password": "change-me",
+    "pattern": "1,2,3,4"
+  }
 }

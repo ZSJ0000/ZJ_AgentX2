@@ -44,3 +44,7 @@ HostToolBridge(host).register_tools(registry)
 ## MCP 管理
 
 使用 MCP_TEMPLATES 配置自定义或 GitHub stdio MCP；GitHub MCP 需要用户自行提供令牌。
+
+## 页面配置
+
+`web.host` 默认 `127.0.0.1`；需要局域网访问时改为 `0.0.0.0`，同时建议开启密码。`auth_mode` 可设为 `text` 或 `pattern`。当前 pattern 提供验证协议，图形点选界面仍需后续 UI 增强。

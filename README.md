@@ -44,3 +44,7 @@ python -m unittest discover -s tests -v
 ## 更多工具和 MCP
 
 新增 current_time、uuid、json_format、text_stats、list_dir、find_files、system_info；新增 MCPManager、custom 和 github 模板，支持多 MCP 启用/禁用与失败隔离。
+
+## PySide2 GUI 与 Web
+
+新增 `zj_agentx2/gui.py` 和 `zj_agentx2/web.py`。Web 默认监听 127.0.0.1，可切换 0.0.0.0 供局域网访问；支持关闭验证、文本密码和图形密码数据模式。PySide2 GUI 支持 Web 启停、深浅主题和状态面板。

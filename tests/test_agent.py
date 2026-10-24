@@ -60,3 +60,13 @@ class ExpansionFinalTests(unittest.TestCase):
  def test_mcp_templates(self):
   from zj_agentx2.mcp_manager import MCP_TEMPLATES
   self.assertIn('github',MCP_TEMPLATES); self.assertIn('custom',MCP_TEMPLATES)
+
+class FinalGUIWebTests(unittest.TestCase):
+ def test_web_auth(self):
+  from zj_agentx2.web import WebConfig,AuthManager
+  self.assertTrue(AuthManager(WebConfig(password='abc')).verify('abc')); self.assertFalse(AuthManager(WebConfig(password='abc')).verify('bad')); self.assertTrue(AuthManager(WebConfig(auth_enabled=False)).verify('x'))
+ def test_web_pattern_and_gui_import(self):
+  from zj_agentx2.web import WebConfig,AuthManager
+  self.assertTrue(AuthManager(WebConfig(auth_mode='pattern',pattern='1,2,3')).verify('1,2,3'))
+  import zj_agentx2.gui as g
+  self.assertTrue(hasattr(g,'run_gui'))
