@@ -30,7 +30,7 @@ class AgentWebServer:
   self.stop_event.clear(); self.output=''; self.task.update(state='running',task=task,long_mode=long_mode,cycles=0,result=None,error=None,stop_reason=None); self.logs.append({'time':time.time(),'event':'task_started','task':task,'long_mode':long_mode})
   def work():
    try:
-    result=runner(task,self.stop_event,self.max_long_cycles) if long_mode else runner(task); self.task.update(state='completed',result=result.get('result') if isinstance(result,dict) else str(result),cycles=result.get('cycles',1) if isinstance(result,dict) else 1,stop_reason=result.get('stop_reason') if isinstance(result,dict) else None); self.logs.append({'time':time.time(),'event':'task_completed'})
+    result=runner(task,self.stop_event,self.max_long_cycles) if long_mode else runner(task); self.task.update(state='completed',result=result.get('result') if isinstance(result,dict) else str(result),cycles=result.get('cycles',1) if isinstance(result,dict) else 1,stop_reason=(result.get('stop_reason') if isinstance(result,dict) and result.get('stop_reason') else self.task.get('stop_reason'))); self.logs.append({'time':time.time(),'event':'task_completed'})
    except Exception as e: self.task.update(state='error',error=str(e)); self.logs.append({'time':time.time(),'event':'task_error','error':str(e)})
   self.task_thread=threading.Thread(target=work,daemon=True); self.task_thread.start(); return self.task
  def request_stop(self):
