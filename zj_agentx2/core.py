@@ -5,9 +5,9 @@ class ModelResponse:
     def __init__(self, content=None, tool_calls=None): self.content=content or ""; self.tool_calls=tool_calls or []
 
 class AgentConfig:
-    def __init__(self, name="main", system_prompt="You are a helpful agent.", allowed_tools=None, max_rounds=8, max_depth=2, subagents=None):
+    def __init__(self, name="main", system_prompt="You are a helpful agent.", allowed_tools=None, max_rounds=8, max_depth=2, subagents=None, subagent_policy="prefer_when_complex"):
         self.name, self.system_prompt, self.allowed_tools = name, system_prompt, allowed_tools
-        self.max_rounds, self.max_depth, self.subagents = max_rounds, max_depth, subagents or {}
+        self.max_rounds, self.max_depth, self.subagents, self.subagent_policy = max_rounds, max_depth, subagents or {}, subagent_policy
 
 class OpenAIModel:
     def __init__(self, base_url, api_key, model, timeout=60): self.url=base_url.rstrip("/")+"/chat/completions"; self.key=api_key; self.model=model; self.timeout=timeout
@@ -73,7 +73,7 @@ class AgentRuntime:
         schemas = self.registry.schemas(config.allowed_tools)
         if getattr(self, "_schema_long_mode", False): schemas.append({"type":"function","function":{"name":"long_task_stop","description":"停止长任务","parameters":{"type":"object","properties":{"stop":{"type":"boolean"},"reason":{"type":"string"}},"required":["stop"],"additionalProperties":False}}})
         if config.subagents and (config.allowed_tools is None or "delegate" in config.allowed_tools):
-            schemas.append({"type":"function", "function":{"name":"delegate", "description":"将任务委派给指定子 Agent", "parameters":{"type":"object","properties":{"agent":{"type":"string"},"task":{"type":"string"}},"required":["agent","task"],"additionalProperties":False}}})
+            schemas.append({"type":"function", "function":{"name":"delegate", "description":"将复杂、独立或需要复核的子任务委派给指定子 Agent。可用名称: " + ", ".join(config.subagents.keys()), "parameters":{"type":"object","properties":{"agent":{"type":"string","enum":list(config.subagents.keys())},"task":{"type":"string"}},"required":["agent","task"],"additionalProperties":False}}})
         return schemas
 
     def _delegate(self, args, parent, depth):

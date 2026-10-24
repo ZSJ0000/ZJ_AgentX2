@@ -56,3 +56,7 @@ Web `/api/chat` 支持 `long_mode:true`，模型返回完成后会继续执行�
 ## 一键部署
 
 Linux：`sh deploy_linux.sh`；Windows 7/CMD：`deploy_windows.bat`。通用方式：`python deploy.py`。部署会创建项目内 `.venv`、`config.json`、`workspace` 并运行测试；不会覆盖已有配置。详细说明见 `docs/DEPLOY.md`。
+
+## 模型提示词
+
+Agent 会自动获得详细工具使用规则、平台安全机制和子 Agent 委派策略。复杂研究、文件分析、代码审查、独立复核等任务会优先考虑子 Agent；简单任务不会强制拆分。可用 `subagent_policy` 调整策略。

@@ -98,3 +98,14 @@ class DeploymentDocsTests(unittest.TestCase):
   self.assertTrue(os.path.exists(os.path.join(root,'docs','DEPLOY.md')))
   with open(os.path.join(root,'.gitignore')) as f: ignored=f.read()
   self.assertIn('.venv/',ignored)
+
+class DelegationSchemaTests(unittest.TestCase):
+ def test_delegate_schema_lists_agents(self):
+  from zj_agentx2.core import AgentRuntime,AgentConfig,ScriptedModel
+  sub=AgentConfig(name='researcher'); m=ScriptedModel(['{"type":"final","content":"ok"}']); r=AgentRuntime(build_default_registry(tempfile.mkdtemp()),m); r.run('x',AgentConfig(subagents={'researcher':sub})); schemas=r._schemas(AgentConfig(subagents={'researcher':sub})); delegate=[x for x in schemas if x.get('function',{}).get('name')=='delegate'][0]; self.assertEqual(delegate['function']['parameters']['properties']['agent']['enum'],['researcher'])
+ def test_policy_config(self):
+  from zj_agentx2.config import load_config
+  import json,os
+  p=os.path.join(tempfile.mkdtemp(),'c.json')
+  with open(p,'w') as f: json.dump({'subagent_policy':'balanced'},f)
+  self.assertEqual(load_config(p)[1].subagent_policy,'balanced')
