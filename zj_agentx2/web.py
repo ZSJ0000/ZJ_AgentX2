@@ -27,6 +27,8 @@ class AgentWebServer:
   self.task_thread=threading.Thread(target=work,daemon=True); self.task_thread.start(); return self.task
  def request_stop(self): self.stop_event.set(); self.task['stop_reason']='user_stop'; return self.task
  def start(self):
+  if self.server:
+   return self.server.server_address
   owner=self
   class H(BaseHTTPRequestHandler):
    def log_message(self,*a):pass
