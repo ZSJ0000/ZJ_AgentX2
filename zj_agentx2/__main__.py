@@ -13,7 +13,7 @@ def main():
  model=OpenAIModel(raw['base_url'],raw.get('api_key',''),raw['model'],raw.get('timeout_seconds',60),stream=stream,on_token=on_token if output else None)
  runtime=AgentRuntime(r,model)
  web_cfg=WebConfig.from_dict(raw.get('web',{})); web_server=None
- def run_task(task): return runtime.run(task,cfg)
+ def run_task(task,event=None): return runtime.run(task,cfg,stop_event=event)
  def run_long(task,event,limit): return runtime.run_long_task(task,cfg,stop_event=event,max_cycles=limit)
  mode=a.mode or raw.get('startup_mode','auto')
  if mode=='auto': mode='gui' if raw.get('gui',{}).get('enabled',True) else ('web' if web_cfg.enabled else 'cli')
