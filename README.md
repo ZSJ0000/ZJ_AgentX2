@@ -35,3 +35,8 @@ python -m unittest discover -s tests -v
 ### 配置 MCP 和子 Agent
 
 在 `config.json` 中添加 `mcp_servers`，启动时自动 initialize、tools/list，并注册为 `<name>__<tool>`；`subagents` 可直接配置子 Agent。
+
+
+## 宿主能力工具
+
+框架提供 `HostBridge` / `HostToolBridge`，可桥接宿主的用户交互和平台能力：`ask_user`、`request_consent`、`load_skill`、`load_mcp_server`、`action_confirmation`、`publish_artifact`、`manage_todos`、`memory`。这些不是伪造的本地实现，而是回调协议；没有宿主回调会明确返回 `unavailable`。CLI 默认关闭，配置 `enable_host_tools: true` 才注册。

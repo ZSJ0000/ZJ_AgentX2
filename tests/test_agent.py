@@ -46,3 +46,9 @@ class ConfigRuntimeTests(unittest.TestCase):
  def test_mcp_timeout_property_exists(self):
   from zj_agentx2.mcp import MCPStdioClient
   self.assertEqual(MCPStdioClient('no-such-command', timeout=3).timeout,3)
+
+class HostFinalTests(unittest.TestCase):
+ def test_host_error_is_structured(self):
+  from zj_agentx2.host import HostBridge
+  result=HostBridge({'memory':lambda a: (_ for _ in ()).throw(RuntimeError('bad'))}).call('memory',{'action':'list'})
+  self.assertEqual(result['status'],'error'); self.assertIn('bad',result['message'])

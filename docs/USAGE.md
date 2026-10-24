@@ -27,3 +27,16 @@ CLI 从 `mcp_servers` 启动 stdio MCP Server，工具注册为 `demo__工具名
 ## 子 Agent 配置
 
 在 `subagents` 中配置 `system_prompt`、`allowed_tools`、`max_rounds` 和 `max_depth`。
+
+
+## 宿主工具回调
+
+宿主程序可注入回调：
+
+```python
+from zj_agentx2 import HostBridge, HostToolBridge
+host = HostBridge({"ask_user": lambda payload: {"answer": "yes"}})
+HostToolBridge(host).register_tools(registry)
+```
+
+高风险能力（授权、外部确认、发布产物）应由宿主回调显示真实卡片并在用户确认后返回结果。

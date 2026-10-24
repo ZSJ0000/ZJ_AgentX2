@@ -25,5 +25,6 @@
       ],
       "max_rounds": 6
     }
-  }
+  },
+  "enable_host_tools": false
 }
