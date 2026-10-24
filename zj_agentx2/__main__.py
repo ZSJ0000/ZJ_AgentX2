@@ -14,7 +14,7 @@ def main():
  def on_token(text):
   if mode=='cli': print(text,end='',flush=True)
   elif sink[0]: sink[0](text)
- model=OpenAIModel(raw['base_url'],raw.get('api_key',''),raw['model'],raw.get('timeout_seconds',60),stream=stream,on_token=on_token if output else None)
+ model=OpenAIModel(raw['base_url'],raw.get('api_key',''),raw['model'],raw.get('timeout_seconds',60),stream=stream,on_token=on_token if output and mode == 'cli' else None)
  runtime=AgentRuntime(r,model); web_server=None
  def run_task(task,event=None): return runtime.run(task,cfg,stop_event=event)
  def run_long(task,event,limit): return runtime.run_long_task(task,cfg,stop_event=event,max_cycles=limit)
