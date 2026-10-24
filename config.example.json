@@ -4,34 +4,15 @@
   "model": "local-model",
   "startup_mode": "gui",
   "max_long_cycles": 1000,
-  "gui": {"enabled": true},
+  "gui": {
+    "enabled": true
+  },
   "workspace": "workspace",
   "timeout_seconds": 60,
   "max_rounds": 8,
   "max_depth": 2,
   "enable_shell": false,
-  "mcp_servers": [
-    {
-      "name": "demo",
-      "command": "python",
-      "args": [
-        "path/to/mcp_server.py"
-      ],
-      "timeout_seconds": 30
-    },
-    {
-      "name": "github",
-      "enabled": false,
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
-      }
-    }
-  ],
+  "mcp_servers": [],
   "subagents": {
     "researcher": {
       "system_prompt": "Research carefully.",
@@ -49,6 +30,10 @@
     "auth_enabled": true,
     "auth_mode": "text",
     "password": "change-me",
-    "pattern": "1,2,3,4"
-  }
+    "pattern": "1,2,3,4",
+    "secret": "change-this-local-secret"
+  },
+  "stream": true,
+  "stream_output": true,
+  "subagent_policy": "prefer_when_complex"
 }
