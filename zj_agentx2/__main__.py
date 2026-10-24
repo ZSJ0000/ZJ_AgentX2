@@ -21,7 +21,7 @@ def main():
  try:
   if mode in ('gui','web'):
    if not web_cfg.enabled: raise RuntimeError('web.enabled must be true for GUI/Web mode')
-   web_server=AgentWebServer(web_cfg,agent_runner=run_task,long_runner=run_long,max_long_cycles=int(raw.get('max_long_cycles',1000)))
+   web_server=AgentWebServer(web_cfg,agent_runner=run_task,long_runner=run_long,max_long_cycles=int(raw.get('max_long_cycles',1000)),reset_callback=reset_conversation)
    sink[0]=web_server.append_output
    address=web_server.start(); url='http://%s:%s' % address
    if mode=='web':
