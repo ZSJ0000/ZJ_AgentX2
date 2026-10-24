@@ -40,3 +40,7 @@ HostToolBridge(host).register_tools(registry)
 ```
 
 高风险能力（授权、外部确认、发布产物）应由宿主回调显示真实卡片并在用户确认后返回结果。
+
+## MCP 管理
+
+使用 MCP_TEMPLATES 配置自定义或 GitHub stdio MCP；GitHub MCP 需要用户自行提供令牌。

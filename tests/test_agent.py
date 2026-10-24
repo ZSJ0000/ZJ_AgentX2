@@ -52,3 +52,11 @@ class HostFinalTests(unittest.TestCase):
   from zj_agentx2.host import HostBridge
   result=HostBridge({'memory':lambda a: (_ for _ in ()).throw(RuntimeError('bad'))}).call('memory',{'action':'list'})
   self.assertEqual(result['status'],'error'); self.assertIn('bad',result['message'])
+
+class ExpansionFinalTests(unittest.TestCase):
+ def test_extra_tools(self):
+  import json
+  r=build_default_registry(tempfile.mkdtemp()); r.execute('write_file',{'path':'a.txt','content':'x'}); self.assertIn('a.txt',r.execute('find_files',{'pattern':'**/*.txt'})); self.assertEqual(r.get('list_dir').risk,'medium'); self.assertIn('characters',json.loads(r.execute('text_stats',{'text':'a b'})))
+ def test_mcp_templates(self):
+  from zj_agentx2.mcp_manager import MCP_TEMPLATES
+  self.assertIn('github',MCP_TEMPLATES); self.assertIn('custom',MCP_TEMPLATES)

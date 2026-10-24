@@ -40,3 +40,7 @@ python -m unittest discover -s tests -v
 ## 宿主能力工具
 
 框架提供 `HostBridge` / `HostToolBridge`，可桥接宿主的用户交互和平台能力：`ask_user`、`request_consent`、`load_skill`、`load_mcp_server`、`action_confirmation`、`publish_artifact`、`manage_todos`、`memory`。这些不是伪造的本地实现，而是回调协议；没有宿主回调会明确返回 `unavailable`。CLI 默认关闭，配置 `enable_host_tools: true` 才注册。
+
+## 更多工具和 MCP
+
+新增 current_time、uuid、json_format、text_stats、list_dir、find_files、system_info；新增 MCPManager、custom 和 github 模板，支持多 MCP 启用/禁用与失败隔离。
