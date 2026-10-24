@@ -52,3 +52,7 @@ python -m unittest discover -s tests -v
 ## 长任务模式
 
 Web `/api/chat` 支持 `long_mode:true`，模型返回完成后会继续执行；模型可调用 `long_task_stop` 且 `stop:true` 停止，用户可通过 `/api/stop` 停止。系统默认安全上限为 1000 个周期，可配置。
+
+## 一键部署
+
+Linux：`sh deploy_linux.sh`；Windows 7/CMD：`deploy_windows.bat`。通用方式：`python deploy.py`。部署会创建项目内 `.venv`、`config.json`、`workspace` 并运行测试；不会覆盖已有配置。详细说明见 `docs/DEPLOY.md`。

@@ -90,3 +90,10 @@ class PlatformMechanismTests(unittest.TestCase):
  def test_agent_context(self):
   from zj_agentx2.core import AgentRuntime,AgentConfig,ScriptedModel
   m=ScriptedModel(['{"type":"final","content":"ok"}']); AgentRuntime(build_default_registry(tempfile.mkdtemp()),m).run('x',AgentConfig()); self.assertIn('Platform capability manifest',m.last_messages[0]['content'])
+
+class DeploymentDocsTests(unittest.TestCase):
+ def test_deploy_doc_and_venv_ignore(self):
+  import os
+  root=os.path.dirname(os.path.dirname(__file__))
+  self.assertTrue(os.path.exists(os.path.join(root,'docs','DEPLOY.md')))
+  self.assertIn('.venv/',open(os.path.join(root,'.gitignore')).read())
