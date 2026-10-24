@@ -10,18 +10,47 @@ class AgentConfig:
         self.max_rounds, self.max_depth, self.subagents, self.subagent_policy = max_rounds, max_depth, subagents or {}, subagent_policy
 
 class OpenAIModel:
-    def __init__(self, base_url, api_key, model, timeout=60): self.url=base_url.rstrip("/")+"/chat/completions"; self.key=api_key; self.model=model; self.timeout=timeout
-    def complete(self, messages, tools):
-        body=json.dumps({"model":self.model,"messages":messages,"tools":tools,"tool_choice":"auto"}).encode("utf-8")
-        req=urllib.request.Request(self.url, body, {"Content-Type":"application/json", "Authorization":"Bearer "+self.key})
-        with urllib.request.urlopen(req, timeout=self.timeout) as x: data=json.loads(x.read().decode("utf-8"))
-        message=data["choices"][0]["message"]; calls=[]
+    def __init__(self, base_url, api_key, model, timeout=60, stream=False, on_token=None):
+        self.url=base_url.rstrip("/")+"/chat/completions"; self.key=api_key; self.model=model; self.timeout=timeout
+        self.stream=bool(stream); self.on_token=on_token
+    def _response(self, data):
+        message=data["choices"][0].get("message", {}); calls=[]
         for call in message.get("tool_calls", []):
             fn=call.get("function", {})
             try: args=json.loads(fn.get("arguments", "{}"))
             except ValueError: args={}
             calls.append({"id":call.get("id", ""),"name":fn.get("name", ""),"arguments":args})
         return ModelResponse(message.get("content") or "", calls)
+    def _complete_stream(self, response):
+        content=[]; calls={}
+        for raw in response:
+            line=raw.decode("utf-8", "replace").strip()
+            if not line or line.startswith(":"): continue
+            if line.startswith("data:"): line=line[5:].strip()
+            if line == "[DONE]": break
+            try: chunk=json.loads(line)
+            except ValueError: continue
+            choice=(chunk.get("choices") or [{}])[0]; delta=choice.get("delta") or {}
+            text=delta.get("content") or ""
+            if text:
+                content.append(text)
+                if self.on_token: self.on_token(text)
+            for part in delta.get("tool_calls") or []:
+                i=part.get("index",0); item=calls.setdefault(i,{"id":"","name":"","arguments":""})
+                item["id"] += part.get("id") or ""; fn=part.get("function") or {}
+                item["name"] += fn.get("name") or ""; item["arguments"] += fn.get("arguments") or ""
+        parsed=[]
+        for item in calls.values():
+            try: args=json.loads(item["arguments"] or "{}")
+            except ValueError: args={}
+            parsed.append({"id":item["id"],"name":item["name"],"arguments":args})
+        return ModelResponse("".join(content), parsed)
+    def complete(self, messages, tools):
+        body={"model":self.model,"messages":messages,"tools":tools,"tool_choice":"auto"}
+        if self.stream: body["stream"]=True
+        req=urllib.request.Request(self.url,json.dumps(body).encode("utf-8"),{"Content-Type":"application/json","Authorization":"Bearer "+self.key})
+        with urllib.request.urlopen(req, timeout=self.timeout) as x:
+            return self._complete_stream(x) if self.stream else self._response(json.loads(x.read().decode("utf-8")))
 
 class AgentRuntime:
     def __init__(self, registry, model, audit=None, platform_context=None): self.registry=registry; self.model=model; self.audit=audit or []; self.platform_context=platform_context or model_context(); self._stop_requested=False
