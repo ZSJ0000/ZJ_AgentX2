@@ -60,3 +60,7 @@ Linux：`sh deploy_linux.sh`；Windows 7/CMD：`deploy_windows.bat`。通用方�
 ## 模型提示词
 
 Agent 会自动获得详细工具使用规则、平台安全机制和子 Agent 委派策略。复杂研究、文件分析、代码审查、独立复核等任务会优先考虑子 Agent；简单任务不会强制拆分。可用 `subagent_policy` 调整策略。
+
+## 仓库外一键安装
+
+Linux：`sh -c "$(curl -fsSL https://raw.githubusercontent.com/ZSJ0000/ZJ_AgentX2/master/install_linux.sh)"`。Windows 7/CMD：先安装 Git，执行 `git clone https://github.com/ZSJ0000/ZJ_AgentX2.git "%USERPROFILE%\ZJ_AgentX2" && "%USERPROFILE%\ZJ_AgentX2\install_windows.bat" --no-venv`。详细参数见 `docs/INSTALL.md`。
