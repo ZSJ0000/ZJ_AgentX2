@@ -48,3 +48,7 @@ python -m unittest discover -s tests -v
 ## PySide2 GUI 与 Web
 
 新增 `zj_agentx2/gui.py` 和 `zj_agentx2/web.py`。Web 默认监听 127.0.0.1，可切换 0.0.0.0 供局域网访问；支持关闭验证、文本密码和图形密码数据模式。PySide2 GUI 支持 Web 启停、深浅主题和状态面板。
+
+## 长任务模式
+
+Web `/api/chat` 支持 `long_mode:true`，模型返回完成后会继续执行；模型可调用 `long_task_stop` 且 `stop:true` 停止，用户可通过 `/api/stop` 停止。系统默认安全上限为 1000 个周期，可配置。

@@ -70,3 +70,12 @@ class FinalGUIWebTests(unittest.TestCase):
   self.assertTrue(AuthManager(WebConfig(auth_mode='pattern',pattern='1,2,3')).verify('1,2,3'))
   import zj_agentx2.gui as g
   self.assertTrue(hasattr(g,'run_gui'))
+
+class LongTaskFinalTests(unittest.TestCase):
+ def test_core_stop_tool(self):
+  from zj_agentx2.core import AgentRuntime,AgentConfig,ScriptedModel
+  m=ScriptedModel(['{"type":"final","content":"phase"}','{"type":"tool_call","name":"long_task_stop","arguments":{"stop":true}}']); x=AgentRuntime(build_default_registry(tempfile.mkdtemp()),m).run_long_task('x',AgentConfig(),max_cycles=2); self.assertEqual(x['stop_reason'],'user_or_tool_stop')
+ def test_web_background_stop(self):
+  from zj_agentx2.web import AgentWebServer,WebConfig
+  def r(t,e,n): e.set(); return {'result':'ok','cycles':1,'stop_reason':'user_or_tool_stop'}
+  s=AgentWebServer(WebConfig(auth_enabled=False),long_runner=r); s.start_task('x',True); s.task_thread.join(1); self.assertEqual(s.task['state'],'completed'); self.assertEqual(s.task['result'],'ok')

@@ -23,20 +23,45 @@ class OpenAIModel:
         return ModelResponse(message.get("content") or "", calls)
 
 class AgentRuntime:
-    def __init__(self, registry, model, audit=None): self.registry=registry; self.model=model; self.audit=audit or []
-    def run(self, task, config, depth=0):
+    def __init__(self, registry, model, audit=None): self.registry=registry; self.model=model; self.audit=audit or []; self._stop_requested=False
+    def request_stop(self): self._stop_requested=True
+    def run_long_task(self, task, config, stop_event=None, max_cycles=1000, depth=0):
+        import threading
+        event=stop_event or threading.Event(); self._stop_requested=False; results=[]; cycles=0
+        while cycles < max_cycles and not event.is_set() and not self._stop_requested:
+            cycles += 1
+            result=self.run(task if cycles == 1 else '继续执行上一个长任务；完成后继续，不要主动结束。', config, depth=depth, long_mode=True, stop_event=event)
+            results.append(result)
+        reason='user_or_tool_stop' if event.is_set() or self._stop_requested else 'safety_limit'
+        self.audit.append({'agent':config.name,'long_task':True,'cycles':cycles,'stop_reason':reason})
+        return {'result':results[-1] if results else '', 'results':results, 'cycles':cycles, 'stop_reason':reason}
+    def _stop_tool(self,args,event):
+        if args.get('stop',False):
+            if event: event.set()
+            self._stop_requested=True
+            return 'long task stop requested: '+str(args.get('reason','model requested stop'))
+        return 'stop remains false; continue'
+
+    def run(self, task, config, depth=0, long_mode=False, stop_event=None):
         if depth > config.max_depth: return "subagent depth limit reached"
         messages=[{"role":"system","content":config.system_prompt},{"role":"user","content":task}]
+        event=stop_event
         for _ in range(config.max_rounds):
+            if event is not None and event.is_set(): return "stopped by user"
+            self._schema_long_mode=long_mode
             response=self.model.complete(messages, self._schemas(config))
             if response.tool_calls:
                 c=response.tool_calls[0]; raw=json.dumps({"type":"tool_call","name":c["name"],"arguments":c["arguments"],"id":c.get("id","")})
             else: raw=response.content
             data=self._parse(raw); self.audit.append({"agent":config.name,"response":data})
-            if data.get("type") == "final": return data.get("content", "")
+            if data.get("type") == "final":
+                if long_mode and not (event is not None and event.is_set()) and not self._stop_requested:
+                    messages.append({"role":"assistant","content":data.get("content","")}); messages.append({"role":"user","content":"继续执行。只有调用 long_task_stop 且 stop=true，或用户停止，才能结束。"}); continue
+                return data.get("content", "")
             if data.get("type") != "tool_call": return raw
             name=data.get("name"); args=data.get("arguments", {})
-            if config.allowed_tools is not None and name not in config.allowed_tools: result="permission denied: "+name
+            if config.allowed_tools is not None and name not in config.allowed_tools and not (long_mode and name == "long_task_stop"): result="permission denied: "+name
+            elif name == "long_task_stop": result=self._stop_tool(args,event)
             elif name == "delegate": result=self._delegate(args, config, depth)
             else:
                 try: result=self.registry.execute(name, args)
@@ -45,6 +70,7 @@ class AgentRuntime:
         return "max rounds reached"
     def _schemas(self, config):
         schemas = self.registry.schemas(config.allowed_tools)
+        if getattr(self, "_schema_long_mode", False): schemas.append({"type":"function","function":{"name":"long_task_stop","description":"停止长任务","parameters":{"type":"object","properties":{"stop":{"type":"boolean"},"reason":{"type":"string"}},"required":["stop"],"additionalProperties":False}}})
         if config.subagents and (config.allowed_tools is None or "delegate" in config.allowed_tools):
             schemas.append({"type":"function", "function":{"name":"delegate", "description":"将任务委派给指定子 Agent", "parameters":{"type":"object","properties":{"agent":{"type":"string"},"task":{"type":"string"}},"required":["agent","task"],"additionalProperties":False}}})
         return schemas
