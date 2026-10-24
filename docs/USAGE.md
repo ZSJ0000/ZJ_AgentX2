@@ -64,3 +64,8 @@ HostToolBridge(host).register_tools(registry)
 ## 详细模型提示词与子 Agent 策略
 
 运行时会自动注入工具策略、平台规则、可靠性规则和子 Agent 使用说明。`subagent_policy` 默认是 `prefer_when_complex`：复杂任务优先委派，简单任务直接完成；也可设置 `balanced` 或 `disabled`。委派工具 schema 会列出实际可用的子 Agent 名称，避免模型猜测名称。
+
+
+## Web-first chat mode
+
+Set `startup_mode` to `gui` (GUI launcher plus Web) or `web` (browser only). With `stream` and `stream_output` enabled, the Web chat displays incremental local-model output. The Web task keeps conversation history within the running process; use “开始新对话” to clear the page before starting a fresh session. The stop button signals the same stop event used by the runtime for both normal and long tasks.

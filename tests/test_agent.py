@@ -118,3 +118,17 @@ class ConversationTests(unittest.TestCase):
   h=[{"role":"system","content":"system"}]; r=AgentRuntime(build_default_registry(tempfile.mkdtemp()),m)
   self.assertEqual(r.run('one',AgentConfig(),history=h),'first'); self.assertEqual(r.run('two',AgentConfig(),history=h),'second')
   self.assertEqual([x['content'] for x in h if x['role']=='user'],['one','two'])
+
+
+class WebControlTests(unittest.TestCase):
+ def test_normal_stop_sets_stopping(self):
+  import threading, time
+  from zj_agentx2.web import AgentWebServer,WebConfig
+  started=threading.Event()
+  def runner(task,event=None):
+   started.set()
+   while event is not None and not event.is_set(): time.sleep(0.01)
+   return 'stopped'
+  w=AgentWebServer(WebConfig(auth_enabled=False),agent_runner=runner)
+  w.start_task('x'); self.assertTrue(started.wait(1)); w.request_stop(); w.task_thread.join(1)
+  self.assertEqual(w.task['stop_reason'],'user_stop'); self.assertFalse(w.task_thread.is_alive())
