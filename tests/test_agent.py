@@ -96,4 +96,5 @@ class DeploymentDocsTests(unittest.TestCase):
   import os
   root=os.path.dirname(os.path.dirname(__file__))
   self.assertTrue(os.path.exists(os.path.join(root,'docs','DEPLOY.md')))
-  self.assertIn('.venv/',open(os.path.join(root,'.gitignore')).read())
+  with open(os.path.join(root,'.gitignore')) as f: ignored=f.read()
+  self.assertIn('.venv/',ignored)
